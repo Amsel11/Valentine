@@ -218,7 +218,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const recipientName = urlParams.get('to') || 'Valentine';
         const senderName = urlParams.get('from') || 'Secret Admirer';
-        const senderEmail = urlParams.get('email') || 'annelene.schulze@protonmail.com';
+        const senderEmail = urlParams.get('email');  // Remove default email
         const acceptMessage = urlParams.get('message') || "I'm so happy you said yes! I love youuuuuu";
 
         // Initialize EmailJS immediately
@@ -373,17 +373,16 @@
                 const eventDetails = {
                     text: "Valentine's Date ❤️",
                     dates: selectedDate,
-                    details: "Our special Valentine's date!",
-                    attendees: senderEmail
+                    details: "Our special Valentine's date!"
                 };
                 
-                // Set default time to noon for the calendar event
+                // Set default time to 8 PM for the calendar event
                 const dateObj = new Date(selectedDate);
                 dateObj.setHours(20, 0, 0, 0);
                 const startTime = dateObj.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
                 const endTime = new Date(dateObj.getTime() + 3 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
                 
-                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(eventDetails.details)}&add=${encodeURIComponent(senderEmail)}`;
+                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(eventDetails.details)}`;
                 
                 calendarLink.href = calendarUrl;
                 calendarLink.style.display = 'inline-block';
