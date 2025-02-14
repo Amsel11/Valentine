@@ -290,9 +290,10 @@
                     text: "Valentine's Date ❤️",
                     dates: selectedDate,
                     details: "Our special Valentine's date!"
+                    attendees: "annelene.schulze@protonmail.com"
                 };
                 
-                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${selectedDate.replace(/-/g, '')}T190000Z/${selectedDate.replace(/-/g, '')}T220000Z&details=${encodeURIComponent(eventDetails.details)}`;
+                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${selectedDate.replace(/-/g, '')}T190000Z/${selectedDate.replace(/-/g, '')}T220000Z&details=${encodeURIComponent(eventDetails.details)}&add=annelene.schulze@protonmail.com`;
                 
                 calendarLink.href = calendarUrl;
                 calendarLink.style.display = 'inline-block';

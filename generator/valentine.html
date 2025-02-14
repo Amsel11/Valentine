@@ -1,0 +1,134 @@
+[Your existing valentine.html code, but replace the entire script section with this:]
+
+<script>
+    // Get parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipientName = urlParams.get('to') || 'Valentine';
+    const senderName = urlParams.get('from') || 'Secret Admirer';
+    const senderEmail = urlParams.get('email') || 'annelene.schulze@protonmail.com';
+
+    // Initialize EmailJS
+    (function() {
+        emailjs.init("h8jOB7no7iHd85gEy");
+    })();
+
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const dateSelection = document.getElementById('dateSelection');
+    const calendarLink = document.getElementById('calendarLink');
+    const responseMessage = document.getElementById('responseMessage');
+
+    // Update the initial message with the recipient's name
+    document.querySelector('.message').textContent = `${recipientName}, will you be my Valentine?`;
+
+    // Function to send email notification
+    function sendValentineNotification(dateText) {
+        emailjs.send("service_vuqthxm", "template_tcfabo8", {
+            date_selected: dateText,
+            from_name: recipientName,
+            message: "Can't wait to spend this special day with you! 💕",
+        }).then(
+            function(response) {
+                console.log("SUCCESS!", response.status, response.text);
+            },
+            function(error) {
+                console.log("FAILED...", error);
+            }
+        );
+    }
+
+    // No button behavior
+    noBtn.addEventListener('mouseover', () => {
+        const buttonWidth = noBtn.offsetWidth;
+        const buttonHeight = noBtn.offsetHeight;
+        
+        const maxX = window.innerWidth - buttonWidth - 40;
+        const maxY = window.innerHeight - buttonHeight - 40;
+        const minX = 20;
+        const minY = 20;
+        
+        const x = Math.floor(Math.random() * (maxX - minX)) + minX;
+        const y = Math.floor(Math.random() * (maxY - minY)) + minY;
+        
+        noBtn.style.position = 'fixed';
+        noBtn.style.transition = 'all 0.3s ease';
+        noBtn.style.left = `${x}px`;
+        noBtn.style.top = `${y}px`;
+        noBtn.style.transform = 'none';
+    });
+
+    // Yes button click handler
+    yesBtn.addEventListener('click', () => {
+        document.querySelector('.buttons').style.display = 'none';
+        dateSelection.classList.add('visible');
+        
+        document.querySelector('.message').innerHTML = `I'm so happy you said yes! I love youuuuuu <br><br> Pick a date for our Valentine's date!`;
+        
+        const catGif = document.getElementById('catGif');
+        catGif.classList.add('show');
+        
+        for(let i = 0; i < 100; i++) {
+            createHeart();
+        }
+    });
+
+    // Date selection handler
+    document.querySelectorAll('.date-option').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const selectedDate = e.target.dataset.date;
+            const dateText = e.target.textContent;
+            
+            // Send email notification
+            sendValentineNotification(dateText);
+            
+            const eventDetails = {
+                text: "Valentine's Date ❤️",
+                dates: selectedDate,
+                details: "Our special Valentine's date!",
+                attendees: senderEmail
+            };
+            
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${selectedDate.replace(/-/g, '')}T190000Z/${selectedDate.replace(/-/g, '')}T220000Z&details=${encodeURIComponent(eventDetails.details)}&add=${encodeURIComponent(senderEmail)}`;
+            
+            calendarLink.href = calendarUrl;
+            calendarLink.style.display = 'inline-block';
+            
+            responseMessage.style.display = 'block';
+            responseMessage.textContent = `Perfect! Can't wait to see you on ${dateText}! 💕`;
+            
+            dateSelection.style.display = 'none';
+        });
+    });
+
+    // Falling hearts animation
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.style.position = 'fixed';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.top = '-20px';
+        heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        heart.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+        heart.style.opacity = Math.random();
+        heart.style.zIndex = '-1';
+        
+        document.body.appendChild(heart);
+
+        const fallAnimation = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                }
+            }
+        `;
+
+        const style = document.createElement('style');
+        style.textContent = fallAnimation;
+        document.head.appendChild(style);
+
+        setTimeout(() => {
+            heart.remove();
+            style.remove();
+        }, 5000);
+    }
+</script>
