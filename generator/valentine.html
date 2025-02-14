@@ -264,13 +264,26 @@
                 ? "Can't wait to spend this special day with you! 💕" 
                 : "They said YES to being your Valentine! 💝";
             
-            emailjs.send("service_vuqthxm", "template_tcfabo8", {
-                date_selected: dateText || "No date selected",
+            // Choose template based on email
+            const templateId = senderEmail === 'annelene.schulze@protonmail.com' 
+                ? "template_tcfabo8"  // personal template
+                : "template_7hek5ny"; // general template
+            
+            // Create email data object
+            const emailData = {
                 from_name: recipientName,
-                to_email: senderEmail,
-                to_name: senderName,
+                reply_to: senderEmail,
                 message: message,
-            }).then(
+                sender_name: senderName  // Add sender's name
+            };
+
+            // Only add date_selected if a date was actually chosen
+            if (dateText) {
+                emailData.date_selected = dateText;
+                emailData.has_date = true;  // Flag to control date display in template
+            }
+            
+            emailjs.send("service_vuqthxm", templateId, emailData).then(
                 response => console.log("SUCCESS!", response.status, response.text),
                 error => console.log("FAILED...", error)
             );
