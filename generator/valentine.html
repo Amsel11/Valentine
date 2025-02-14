@@ -168,7 +168,6 @@
         }
 
         .response-message {
-            font-family: 'Dancing Script', cursive;
             font-size: clamp(1.2rem, 4vw, 1.5rem);
             color: #FF69B4;
             text-align: center;
@@ -206,7 +205,8 @@
         <button id="noBtn" class="btn">No</button>
     </div>
     <div id="dateSelection" class="date-selection">
-        <!-- Date options will be added dynamically -->
+        <button class="date-option" data-date="2025-02-21">Friday, February 21st</button>
+        <button class="date-option" data-date="2025-02-22">Saturday, February 22nd</button>
     </div>
     <a id="calendarLink" class="calendar-btn" target="_blank">
         Add to Google Calendar
@@ -219,11 +219,6 @@
         const recipientName = urlParams.get('to') || 'Valentine';
         const senderName = urlParams.get('from') || 'Secret Admirer';
         const senderEmail = urlParams.get('email') || 'annelene.schulze@protonmail.com';
-        
-        // Add parsing of date parameters
-        const date1 = urlParams.get('date1');
-        const date2 = urlParams.get('date2');
-        const date3 = urlParams.get('date3');
 
         // Initialize EmailJS
         (function() {
@@ -285,32 +280,14 @@
             const catGif = document.getElementById('catGif');
             catGif.classList.add('show');
             
-            // Populate date options dynamically
-            const dateSelection = document.getElementById('dateSelection');
-            dateSelection.innerHTML = ''; // Clear existing options
-            
-            [date1, date2, date3].filter(date => date).forEach(date => {
-                const button = document.createElement('button');
-                button.className = 'date-option';
-                button.dataset.date = date;
-                
-                // Convert date to readable format
-                const dateObj = new Date(date);
-                const options = { weekday: 'long', month: 'long', day: 'numeric' };
-                const dateText = dateObj.toLocaleDateString('en-US', options);
-                
-                button.textContent = dateText;
-                dateSelection.appendChild(button);
-            });
-            
             for(let i = 0; i < 100; i++) {
                 createHeart();
             }
         });
 
         // Date selection handler
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('date-option')) {
+        document.querySelectorAll('.date-option').forEach(button => {
+            button.addEventListener('click', (e) => {
                 const selectedDate = e.target.dataset.date;
                 const dateText = e.target.textContent;
                 
@@ -329,14 +306,11 @@
                 calendarLink.href = calendarUrl;
                 calendarLink.style.display = 'inline-block';
                 
-                // Hide the message when date is selected
-                document.querySelector('.message').style.display = 'none';
-                
                 responseMessage.style.display = 'block';
                 responseMessage.textContent = `Perfect! Can't wait to see you on ${dateText}! 💕`;
                 
                 dateSelection.style.display = 'none';
-            }
+            });
         });
 
         // Falling hearts animation
