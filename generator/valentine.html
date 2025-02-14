@@ -168,6 +168,7 @@
         }
 
         .response-message {
+            font-family: 'Dancing Script', cursive;
             font-size: clamp(1.2rem, 4vw, 1.5rem);
             color: #FF69B4;
             text-align: center;
@@ -205,8 +206,7 @@
         <button id="noBtn" class="btn">No</button>
     </div>
     <div id="dateSelection" class="date-selection">
-        <button class="date-option" data-date="2025-02-21">Friday, February 21st</button>
-        <button class="date-option" data-date="2025-02-22">Saturday, February 22nd</button>
+        <!-- Date options will be added here dynamically -->
     </div>
     <a id="calendarLink" class="calendar-btn" target="_blank">
         Add to Google Calendar
@@ -214,106 +214,69 @@
     <div id="responseMessage" class="response-message"></div>
 
     <script>
-        // Get parameters from URL
+        // Get parameters from URL and set default values
         const urlParams = new URLSearchParams(window.location.search);
         const recipientName = urlParams.get('to') || 'Valentine';
         const senderName = urlParams.get('from') || 'Secret Admirer';
         const senderEmail = urlParams.get('email') || 'annelene.schulze@protonmail.com';
+        const acceptMessage = urlParams.get('message') || "I'm so happy you said yes! I love youuuuuu";
 
-        // Initialize EmailJS
+        // Initialize EmailJS immediately
         (function() {
             emailjs.init("h8jOB7no7iHd85gEy");
         })();
 
+        // Get all DOM elements once at the start
+        const dateSelection = document.getElementById('dateSelection');
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
-        const dateSelection = document.getElementById('dateSelection');
         const calendarLink = document.getElementById('calendarLink');
         const responseMessage = document.getElementById('responseMessage');
+        const messageElement = document.querySelector('.message');
+        const catGif = document.getElementById('catGif');
 
-        // Update the initial message with the recipient's name
-        document.querySelector('.message').textContent = `${recipientName}, will you be my Valentine?`;
+        // Set initial message with recipient's name
+        messageElement.textContent = `${recipientName}, will you be my Valentine?`;
 
-        // Function to send email notification
-        function sendValentineNotification(dateText) {
+        // Generate dynamic date options from URL parameters
+        const datesParam = urlParams.get('dates');
+        const dateOptions = datesParam ? JSON.parse(decodeURIComponent(datesParam)) : [];
+
+        // Create date buttons dynamically
+        dateOptions.forEach(dateStr => {
+            const date = new Date(dateStr);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric'
+            });
+            
+            const button = document.createElement('button');
+            button.className = 'date-option';
+            button.textContent = formattedDate;
+            button.dataset.date = dateStr;
+            dateSelection.appendChild(button);
+        });
+
+        // Email notification function
+        function sendValentineNotification(dateText = null) {
+            const message = dateText 
+                ? "Can't wait to spend this special day with you! 💕" 
+                : "They said YES to being your Valentine! 💝";
+            
             emailjs.send("service_vuqthxm", "template_tcfabo8", {
-                date_selected: dateText,
+                date_selected: dateText || "No date selected",
                 from_name: recipientName,
-                message: "Can't wait to spend this special day with you! 💕",
+                to_email: senderEmail,
+                to_name: senderName,
+                message: message,
             }).then(
-                function(response) {
-                    console.log("SUCCESS!", response.status, response.text);
-                },
-                function(error) {
-                    console.log("FAILED...", error);
-                }
+                response => console.log("SUCCESS!", response.status, response.text),
+                error => console.log("FAILED...", error)
             );
         }
 
-        // No button behavior
-        noBtn.addEventListener('mouseover', () => {
-            const buttonWidth = noBtn.offsetWidth;
-            const buttonHeight = noBtn.offsetHeight;
-            
-            const maxX = window.innerWidth - buttonWidth - 40;
-            const maxY = window.innerHeight - buttonHeight - 40;
-            const minX = 20;
-            const minY = 20;
-            
-            const x = Math.floor(Math.random() * (maxX - minX)) + minX;
-            const y = Math.floor(Math.random() * (maxY - minY)) + minY;
-            
-            noBtn.style.position = 'fixed';
-            noBtn.style.transition = 'all 0.3s ease';
-            noBtn.style.left = `${x}px`;
-            noBtn.style.top = `${y}px`;
-            noBtn.style.transform = 'none';
-        });
-
-        // Yes button click handler
-        yesBtn.addEventListener('click', () => {
-            document.querySelector('.buttons').style.display = 'none';
-            dateSelection.classList.add('visible');
-            
-            document.querySelector('.message').innerHTML = `I'm so happy you said yes! I love youuuuuu <br><br> Pick a date for our Valentine's date!`;
-            
-            const catGif = document.getElementById('catGif');
-            catGif.classList.add('show');
-            
-            for(let i = 0; i < 100; i++) {
-                createHeart();
-            }
-        });
-
-        // Date selection handler
-        document.querySelectorAll('.date-option').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const selectedDate = e.target.dataset.date;
-                const dateText = e.target.textContent;
-                
-                // Send email notification
-                sendValentineNotification(dateText);
-                
-                const eventDetails = {
-                    text: "Valentine's Date ❤️",
-                    dates: selectedDate,
-                    details: "Our special Valentine's date!",
-                    attendees: senderEmail
-                };
-                
-                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${selectedDate.replace(/-/g, '')}T190000Z/${selectedDate.replace(/-/g, '')}T220000Z&details=${encodeURIComponent(eventDetails.details)}&add=${encodeURIComponent(senderEmail)}`;
-                
-                calendarLink.href = calendarUrl;
-                calendarLink.style.display = 'inline-block';
-                
-                responseMessage.style.display = 'block';
-                responseMessage.textContent = `Perfect! Can't wait to see you on ${dateText}! 💕`;
-                
-                dateSelection.style.display = 'none';
-            });
-        });
-
-        // Falling hearts animation
+        // Animation function for falling hearts
         function createHeart() {
             const heart = document.createElement('div');
             heart.innerHTML = '❤️';
@@ -344,6 +307,80 @@
                 style.remove();
             }, 5000);
         }
+
+        // Event Handlers
+        noBtn.addEventListener('mouseover', () => {
+            const buttonWidth = noBtn.offsetWidth;
+            const buttonHeight = noBtn.offsetHeight;
+            
+            const maxX = window.innerWidth - buttonWidth - 40;
+            const maxY = window.innerHeight - buttonHeight - 40;
+            const minX = 20;
+            const minY = 20;
+            
+            const x = Math.floor(Math.random() * (maxX - minX)) + minX;
+            const y = Math.floor(Math.random() * (maxY - minY)) + minY;
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.transition = 'all 0.3s ease';
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+            noBtn.style.transform = 'none';
+        });
+
+        yesBtn.addEventListener('click', () => {
+            document.querySelector('.buttons').style.display = 'none';
+            
+            // Check if there are any date options
+            if (dateOptions && dateOptions.length > 0) {
+                dateSelection.classList.add('visible');
+                messageElement.innerHTML = `${acceptMessage} <br><br> Pick a date for our Valentine's date!`;
+            } else {
+                messageElement.innerHTML = `${acceptMessage} 💕`;
+                // Send notification immediately if no dates were provided
+                sendValentineNotification();
+            }
+            
+            catGif.classList.add('show');
+            
+            for(let i = 0; i < 100; i++) {
+                createHeart();
+            }
+        });
+
+        // Handle date selection
+        document.querySelectorAll('.date-option').forEach(button => {
+            button.addEventListener('click', (e) => {
+                messageElement.style.display = 'none';
+                const selectedDate = e.target.dataset.date;
+                const dateText = e.target.textContent;
+                
+                sendValentineNotification(dateText);
+                
+                const eventDetails = {
+                    text: "Valentine's Date ❤️",
+                    dates: selectedDate,
+                    details: "Our special Valentine's date!",
+                    attendees: senderEmail
+                };
+                
+                // Set default time to noon for the calendar event
+                const dateObj = new Date(selectedDate);
+                dateObj.setHours(20, 0, 0, 0);
+                const startTime = dateObj.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                const endTime = new Date(dateObj.getTime() + 3 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                
+                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventDetails.text)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(eventDetails.details)}&add=${encodeURIComponent(senderEmail)}`;
+                
+                calendarLink.href = calendarUrl;
+                calendarLink.style.display = 'inline-block';
+                
+                responseMessage.style.display = 'block';
+                responseMessage.textContent = `Perfect! Can't wait to see you on ${dateText}! 💕`;
+                
+                dateSelection.style.display = 'none';
+            });
+        });
     </script>
 </body>
 </html>
